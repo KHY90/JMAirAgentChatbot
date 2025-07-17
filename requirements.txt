@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+transformers
+sentence-transformers
+torch
+markdown
+scikit-learn
+beautifulsoup4
