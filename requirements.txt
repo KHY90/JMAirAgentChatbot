@@ -6,3 +6,4 @@ torch
 markdown
 scikit-learn
 beautifulsoup4
+python-dotenv
