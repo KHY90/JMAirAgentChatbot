@@ -9,14 +9,17 @@ from app.llm_infer import generate_answer
 
 load_dotenv()
 
-# Security API Key 설정
+# 보안 관련 환경 변수 로드
 API_KEY = os.getenv("API_KEY")
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*")
+
 if not API_KEY:
     raise ValueError("API_KEY가 .env 파일에 설정되지 않았습니다.")
 
 async def verify_api_key(x_api_key: str = Header(..., description="API Key")):
+    """API Key 검증"""
     if x_api_key != API_KEY:
-        raise HTTPException(status_code=403, detail="Invalid API Key")
+        raise HTTPException(status_code=403, detail="유효하지 않은 API Key 입니다")
 
 
 app = FastAPI()
@@ -24,7 +27,7 @@ app = FastAPI()
 # CORS 설정
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], 
+    allow_origins=[origin.strip() for origin in ALLOWED_ORIGINS.split(',')],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -35,17 +38,29 @@ app.add_middleware(
 chunks = load_md_file("documents/infomation.md", chunk_size=100, overlap=20)
 chunk_embeddings = embed_chunks(chunks)
 
-@app.post("/ask", dependencies=[Depends(verify_api_key)])
-def ask_question(q: str = Query(..., description="사용자 질문")):
-    relevant_chunk = retrieve_relevant_chunk(q, chunks, chunk_embeddings, embedder_model)
-    answer = generate_answer(relevant_chunk, q)
+
+@app.get("/ask", dependencies=[Depends(verify_api_key)])
+def ask_question(
+    q: str = Query(..., min_length=1, max_length=200, description="사용자 질문")
+):
+    """질문에 대한 답변을 반환"""
+
+    try:
+        relevant_chunk = retrieve_relevant_chunk(
+            q, chunks, chunk_embeddings, embedder_model
+        )
+        answer = generate_answer(relevant_chunk, q)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"질문 처리 중 오류가 발생했습니다: {e}")
+
     return {
         "question": q,
         "context": relevant_chunk,
-        "answer": answer
+        "answer": answer,
     }
 
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "message": "good!"}  
+    """헬스 체크 엔드포인트"""
+    return {"status": "ok", "message": "good!"}

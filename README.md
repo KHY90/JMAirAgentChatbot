@@ -8,12 +8,15 @@ JMAirAgentChatbot은 에어컨 설치 정보를 제공하는 간단한 FastAPI �
 - scikit-learn을 활용한 코사인 유사도 기반 검색
 - 간단한 LLM 추론 예제(`llm_infer.py`)
 - Docker 및 docker-compose 지원
+- API Key 인증과 CORS 설정 지원
+- 기본적인 오류 처리 로직 포함
 
 ## 설치 방법
 1. 이 저장소를 클론합니다.
-2. 프로젝트 루트에 `.env` 파일을 생성하여 `API_KEY` 값을 설정합니다.
+2. 프로젝트 루트에 `.env` 파일을 생성하여 다음 값을 설정합니다.
    ```
    API_KEY=your_api_key
+   ALLOWED_ORIGINS=http://localhost:3000/
    ```
 3. Python 환경에서 의존성을 설치합니다.
    ```bash
