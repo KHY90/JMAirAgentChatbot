@@ -38,6 +38,7 @@ app.add_middleware(
 chunks = load_md_file("documents/infomation.md", chunk_size=100, overlap=20)
 chunk_embeddings = embed_chunks(chunks)
 
+
 @app.get("/ask", dependencies=[Depends(verify_api_key)])
 def ask_question(
     q: str = Query(..., min_length=1, max_length=200, description="사용자 질문")

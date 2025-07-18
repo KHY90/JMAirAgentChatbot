@@ -16,7 +16,7 @@ JMAirAgentChatbot은 에어컨 설치 정보를 제공하는 간단한 FastAPI �
 2. 프로젝트 루트에 `.env` 파일을 생성하여 다음 값을 설정합니다.
    ```
    API_KEY=your_api_key
-   ALLOWED_ORIGINS=http://localhost
+   ALLOWED_ORIGINS=http://localhost:3000/
    ```
 3. Python 환경에서 의존성을 설치합니다.
    ```bash
@@ -55,5 +55,3 @@ app/            FastAPI 애플리케이션 코드
 
 documents/      답변에 사용되는 정보가 담긴 Markdown 파일
 ```
-
-이 프로젝트는 예제용으로 작성되었으며, 기본적인 보안 설정과 오류 처리가 포함되어 있습니다. 실제 서비스에서는 추가적인 검토가 필요합니다.
