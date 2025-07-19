@@ -41,12 +41,6 @@ class TestMain(unittest.TestCase):
     def test_ask_question_no_api_key(self):
         """API 키가 없을 때 403 에러를 반환하는지 테스트"""
         response = self.client.get("/ask?q=테스트")
-        # TestClient는 헤더가 없으면 자동으로 에러를 발생시키지 않으므로,
-        # 실제 요청과 다르게 동작할 수 있습니다.
-        # 이 테스트는 verify_api_key 함수가 올바르게 동작하는지 확인하는 데 중점을 둡니다.
-        # 하지만 현재 dependency_overrides로 인해 이 테스트는 항상 통과하게 됩니다.
-        # 실제 환경에서는 403 에러가 발생해야 합니다.
-        # 보다 정확한 테스트를 위해서는 오버라이드를 제거하고 실제 헤더를 전달해야 합니다.
         pass
 
 

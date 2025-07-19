@@ -2,10 +2,6 @@ import os
 from markdown import markdown
 from bs4 import BeautifulSoup
 
-
-# Markdown 파일을 읽어 청크 단위로 분리하는 함수
-# 에러 메시지와 주석은 모두 한글로 작성되어 있습니다.
-
 def load_md_file(path: str, chunk_size: int = 100, overlap: int = 20) -> list[str]:
     """Markdown 파일을 로드하여 청크 목록으로 반환합니다."""
 

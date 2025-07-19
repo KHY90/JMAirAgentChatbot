@@ -1,6 +1,5 @@
 from sklearn.metrics.pairwise import cosine_similarity
 
-
 # 주어진 질문과 문서 청크들 중 가장 연관성이 높은 청크를 반환합니다.
 def retrieve_relevant_chunk(query, chunks, chunk_embeddings, embedder):
     if not chunks:
