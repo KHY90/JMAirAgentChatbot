@@ -1,9 +1,11 @@
 fastapi
 uvicorn
-transformers
-sentence-transformers
-torch
+#transformers
+#sentence-transformers
+#torch
 markdown
 scikit-learn
 beautifulsoup4
 python-dotenv
+pytest
+requests
