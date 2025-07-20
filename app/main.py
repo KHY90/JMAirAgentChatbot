@@ -1,5 +1,6 @@
 import os
-from fastapi import FastAPI, Query, Depends, HTTPException, Header
+from fastapi import FastAPI, Depends, HTTPException, Header
+from pydantic import BaseModel, Field
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from app.utils import load_md_file
@@ -38,24 +39,22 @@ app.add_middleware(
 chunks = load_md_file("documents/infomation.md", chunk_size=100, overlap=20)
 chunk_embeddings = embed_chunks(chunks)
 
+class Question(BaseModel):
+    q: str = Field(..., min_length=1, max_length=200, description="사용자 질문")
 
-@app.get("/ask", dependencies=[Depends(verify_api_key)])
-def ask_question(
-    q: str = Query(..., min_length=1, max_length=200, description="사용자 질문")
-):
+@app.post("/ask", dependencies=[Depends(verify_api_key)])
+def ask_question(question: Question):
     """질문에 대한 답변을 반환"""
 
     try:
         relevant_chunk = retrieve_relevant_chunk(
-            q, chunks, chunk_embeddings, embedder_model
+            question.q, chunks, chunk_embeddings, embedder_model
         )
-        answer = generate_answer(relevant_chunk, q)
+        answer = generate_answer(relevant_chunk, question.q)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"질문 처리 중 오류가 발생했습니다: {e}")
 
     return {
-        "question": q,
-        "context": relevant_chunk,
         "answer": answer,
     }
 
