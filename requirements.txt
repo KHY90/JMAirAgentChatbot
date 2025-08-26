@@ -1,6 +1,5 @@
 fastapi
 uvicorn
-transformers
 sentence-transformers
 torch
 markdown
@@ -10,3 +9,7 @@ python-dotenv
 pytest
 requests
 langchain
+supabase
+langchain-community
+langchain-openai
+tiktoken
