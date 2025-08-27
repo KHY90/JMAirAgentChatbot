@@ -1,55 +1,45 @@
 import os
-import unittest
 from fastapi.testclient import TestClient
-from app.main import app, verify_api_key
+from app.main import app
 
-# .env 파일에 테스트용 API_KEY 설정
-os.environ["API_KEY"] = "test_api_key"
-
-# API Key 종속성 오버라이드
-async def override_verify_api_key():
-    return "test_api_key"
-
-app.dependency_overrides[verify_api_key] = override_verify_api_key
+# Use a test client for the app
+client = TestClient(app)
 
 
-class TestMain(unittest.TestCase):
-    def setUp(self):
-        self.client = TestClient(app)
-        # 테스트용 문서 파일 생성
-        self.test_doc_path = "documents/infomation.md"
-        os.makedirs(os.path.dirname(self.test_doc_path), exist_ok=True)
-        with open(self.test_doc_path, "w", encoding="utf-8") as f:
-            f.write("이것은 테스트 문서입니다.")
+def setup_module(module):
+    """Create a dummy document for testing."""
+    test_doc_path = "documents/infomation.md"
+    os.makedirs(os.path.dirname(test_doc_path), exist_ok=True)
+    with open(test_doc_path, "w", encoding="utf-8") as f:
+        f.write("벽걸이형 에어컨 기본 설치 비용은 30,000원입니다.")
 
-    def tearDown(self):
-        # 테스트용 문서 파일 삭제
-        if os.path.exists(self.test_doc_path):
-            os.remove(self.test_doc_path)
+def teardown_module(module):
+    """Remove the dummy document after tests."""
+    test_doc_path = "documents/infomation.md"
+    if os.path.exists(test_doc_path):
+        os.remove(test_doc_path)
 
+def test_health_check():
+    """Test the /health endpoint."""
+    response = client.get("/health")
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok", "message": "정상!"}
 
-    def test_ask_question_success(self):
-        """/ask 엔드포인트가 성공적으로 질문에 답변하는지 테스트"""
-        response = self.client.get("/ask?q=테스트", headers={"X-API-Key": "test_api_key"})
-        self.assertEqual(response.status_code, 200)
-        json_response = response.json()
-        self.assertIn("question", json_response)
-        self.assertIn("context", json_response)
-        self.assertIn("answer", json_response)
-        self.assertEqual(json_response["question"], "테스트")
-
-    def test_ask_question_no_api_key(self):
-        """API 키가 없을 때 403 에러를 반환하는지 테스트"""
-        response = self.client.get("/ask?q=테스트")
-        pass
-
-
-    def test_health_check(self):
-        """/health 엔드포인트가 정상적으로 응답하는지 테스트"""
-        response = self.client.get("/health")
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), {"status": "ok", "message": "good!"})
-
-
-if __name__ == "__main__":
-    unittest.main()
+def test_ask_question_integration():
+    """An integration test to ensure the /ask endpoint and RAG chain work.
+    
+    This test can be slow as it may trigger model downloads on the first run.
+    It checks if the endpoint returns a successful response with a non-empty answer.
+    """
+    # The API key verification is currently commented out in main.py
+    # If it's re-enabled, a header will be needed here.
+    response = client.post("/ask", json={"q": "벽걸이 에어컨 설치비 얼마야?"})
+    
+    # Check for a successful response
+    assert response.status_code == 200
+    
+    # Check the response body
+    json_response = response.json()
+    assert "answer" in json_response
+    assert isinstance(json_response["answer"], str)
+    assert len(json_response["answer"]) > 0

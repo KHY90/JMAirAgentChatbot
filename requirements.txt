@@ -1,6 +1,5 @@
 fastapi
 uvicorn
-sentence-transformers
 torch
 markdown
 scikit-learn
@@ -10,6 +9,7 @@ pytest
 requests
 langchain
 supabase
-langchain-community
-langchain-openai
-tiktoken
+unstructured
+langchain-huggingface
+sentence-transformers==2.7.0
+transformers==4.41.2
