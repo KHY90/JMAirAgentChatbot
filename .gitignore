@@ -11,6 +11,9 @@ __pycache__/
 .pytest_cache/
 venv/
 
+# BM25 Index Data
+data/
+
 .firebase/
 CLAUDE.md
 GEMINI.md
