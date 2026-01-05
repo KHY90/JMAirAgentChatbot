@@ -8,4 +8,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Windows CRLF -> Linux LF 변환 및 실행 권한 부여
+RUN sed -i 's/\r$//' entrypoint.sh && chmod +x entrypoint.sh
+
+CMD ["./entrypoint.sh"]

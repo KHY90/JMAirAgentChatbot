@@ -6,7 +6,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import SupabaseVectorStore
 from app.supabase_client import supabase
-from rank_bm25 import BM25Okapi
+from rank_bm25 import BM25Plus
 from kiwipiepy import Kiwi
 from dotenv import load_dotenv
 
@@ -36,24 +36,12 @@ def main():
     )
     docs = text_splitter.split_documents(documents)
 
-    # 3. 임베딩 생성
-    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-
-    # 4. Vector Store 저장 (Supabase)
-    vector_store = SupabaseVectorStore.from_documents(
-        docs,
-        embeddings,
-        client=supabase,
-        table_name="documents",
-        query_name="match_documents",
-    )
-
-    # 5. BM25 인덱스 생성
+    # 3. BM25 인덱스 생성 (먼저 실행 - 로컬 파일이므로 안정적)
     corpus_texts = [doc.page_content for doc in docs]
     tokenized_corpus = [tokenize_korean(text) for text in corpus_texts]
-    bm25_index = BM25Okapi(tokenized_corpus)
+    bm25_index = BM25Plus(tokenized_corpus)
 
-    # 6. BM25 데이터 저장 (로컬 파일)
+    # 4. BM25 데이터 저장 (로컬 파일)
     os.makedirs("data", exist_ok=True)
 
     bm25_data = {
@@ -67,9 +55,23 @@ def main():
     with open("data/bm25_index.pkl", "wb") as f:
         pickle.dump(bm25_index, f)
 
-    print(f"데이터 주입 완료: {len(docs)}개 청크")
-    print("- Vector Store: Supabase 저장 완료")
-    print("- BM25 Index: data/bm25_index.pkl 저장 완료")
+    print(f"BM25 Index 저장 완료: {len(docs)}개 청크")
+
+    # 5. 임베딩 생성 및 Vector Store 저장 (Supabase)
+    try:
+        embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+        vector_store = SupabaseVectorStore.from_documents(
+            docs,
+            embeddings,
+            client=supabase,
+            table_name="documents",
+            query_name="match_documents",
+        )
+        print("Vector Store: Supabase 저장 완료")
+    except Exception as e:
+        print(f"Warning: Supabase 저장 실패 (BM25는 정상 생성됨): {e}")
+
+    print("데이터 주입 완료!")
 
 
 if __name__ == "__main__":
